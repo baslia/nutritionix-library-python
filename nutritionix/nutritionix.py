@@ -1,5 +1,4 @@
 import logging
-import json
 import requests
 import urlparse
 
@@ -14,7 +13,7 @@ class NutritionixClient:
         self.API_KEY = api_key
         self.DEBUG = False
 
-        if debug == True:
+        if debug:
             self.DEBUG = debug
             logging.basicConfig(level=logging.DEBUG)
 
@@ -27,28 +26,30 @@ class NutritionixClient:
     def get_api_key(self, *arg):
         return self.API_KEY
 
-    def execute(self, url=None, method='GET', params={}, data={}, headers={}):
-        """ Bootstrap, execute and return request object,
-                default method: GET
+    def execute(self, url=None, method="GET", params={}, data={}, headers={}):
+        """Bootstrap, execute and return request object,
+        default method: GET
         """
 
         # Verifies params
-        if params.get('limit') != None and params.get('offset') == None:
-            raise Exception('Missing offset',
-                            'limit and offset are required for paginiation.')
+        if params.get("limit") is not None and (params.get("offset") is None):
+            raise Exception(
+                "Missing offset", "limit and offset are required for paginiation."
+            )
 
-        elif params.get('offset') != None and params.get('limit') == None:
-            raise Exception('Missing limit',
-                            'limit and offset are required for paginiation.')
+        elif params.get("offset") is not None and (params.get("limit") is None):
+            raise Exception(
+                "Missing limit", "limit and offset are required for paginiation."
+            )
 
         # Bootstraps the request
         method = method.lower()
 
-        headers['X-APP-ID'] = self.APPLICATION_ID
-        headers['X-APP-KEY'] = self.API_KEY
+        headers["X-APP-ID"] = self.APPLICATION_ID
+        headers["X-APP-KEY"] = self.API_KEY
 
         # Executes the request
-        if method == "get" or not 'method' in locals():
+        if method == "get" or "method" not in locals():
             r = requests.get(url, params=params, headers=headers)
 
         elif method == "post":
@@ -62,10 +63,9 @@ class NutritionixClient:
 
         return r.json()
 
-
-    #--------------
+    # --------------
     # API Methods #
-    #--------------
+    # --------------
 
     def autocomplete(self, **kwargs):
         """
@@ -73,13 +73,13 @@ class NutritionixClient:
         boxes. The term selected by the user in autocomplete will pass to
         the /search endpoint.
         """
-        
+
         # If first arg is String then use it as query
         params = {}
         if kwargs:
             params = kwargs
 
-        endpoint = urlparse.urljoin(BASE_URL, 'autocomplete')
+        endpoint = urlparse.urljoin(BASE_URL, "autocomplete")
 
         return self.execute(endpoint, params=params)
 
@@ -94,19 +94,25 @@ class NutritionixClient:
             params = kwargs
 
         # Converts 'q' argument as request data
-        data = ''
-        if params.get('q'):
-            data = params.get('q')
+        data = ""
+        if params.get("q"):
+            data = params.get("q")
             # Removes 'q' argument from params to avoid pass it as URL argument
-            del params['q']
+            del params["q"]
 
-        endpoint = urlparse.urljoin(BASE_URL, 'natural')
+        endpoint = urlparse.urljoin(BASE_URL, "natural")
 
-        return self.execute(endpoint, method="POST", params=params, data=data, headers={'Content-Type': 'text/plain'})
+        return self.execute(
+            endpoint,
+            method="POST",
+            params=params,
+            data=data,
+            headers={"Content-Type": "text/plain"},
+        )
 
     def search(self, **kwargs):  # TODO: Add advance search filters
         """
-        Search for an entire food term like "mcdonalds big mac" or "celery." 
+        Search for an entire food term like "mcdonalds big mac" or "celery."
         """
 
         # Adds keyword args to the params dictionary
@@ -114,7 +120,7 @@ class NutritionixClient:
         if kwargs:
             params = kwargs
 
-        endpoint = urlparse.urljoin(BASE_URL, 'search')
+        endpoint = urlparse.urljoin(BASE_URL, "search")
 
         return self.execute(endpoint, params=params)
 
@@ -126,30 +132,30 @@ class NutritionixClient:
         if kwargs:
             params = kwargs
 
-        endpoint = urlparse.urljoin(BASE_URL, 'item/%s' % (params.get('id')))
+        endpoint = urlparse.urljoin(BASE_URL, "item/%s" % (params.get("id")))
 
         return self.execute(endpoint)
 
     def brand(self, **kwargs):
-        """Look up a specific brand by ID. """
+        """Look up a specific brand by ID."""
 
         # Adds keyword args to the params dictionary
         params = {}
         if kwargs:
             params = kwargs
 
-        endpoint = urlparse.urljoin(BASE_URL, 'brand/%s' % (params.get('id')))
+        endpoint = urlparse.urljoin(BASE_URL, "brand/%s" % (params.get("id")))
 
         return self.execute(endpoint)
 
     def brand_search(self, **kwargs):
-        """Look up a specific brand by ID. """
+        """Look up a specific brand by ID."""
 
         # Adds keyword args to the params dictionary
         params = {}
         if kwargs:
             params = kwargs
 
-        endpoint = urlparse.urljoin(BASE_URL, 'search/brands/')
+        endpoint = urlparse.urljoin(BASE_URL, "search/brands/")
 
         return self.execute(endpoint, params=params)
